@@ -1,5 +1,6 @@
 // Uniq name for the pod or slave 
 def k8slabel = "jenkins-pipeline-${UUID.randomUUID().toString()}"
+// yaml def for slaves 
 def slavePodTemplate = """
       metadata:
         labels:
@@ -18,6 +19,12 @@ def slavePodTemplate = """
                   - jenkins-jenkins-master
               topologyKey: "kubernetes.io/hostname"
         containers:
+        - name: packer
+          image: hashicorp/packer:1.6.2
+          imagePullPolicy: IfNotPresent
+          command:
+          - cat
+          tty: true
         - name: terraform
           image: hashicorp/terraform:0.12.27
           imagePullPolicy: IfNotPresent
@@ -42,8 +49,14 @@ def slavePodTemplate = """
             hostPath:
               path: /var/run/docker.sock
     """
-podTemplate(name: k8slabel, label: k8slabel, yaml: slavePodTemplate, showRawYaml: true) {
-    node(k8slabel) {
+properties([
+  [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false], 
+  parameters([
+    booleanParam(defaultValue: false, description: 'Please select this to be able to run the job  on debug  mode.', name: 'debugMode')
+    ])
+  ])
+podTemplate(name: k8slabel, label: k8slabel, yaml: slavePodTemplate, showRawYaml: params.debugMode) {
+  node(k8slabel) {
     stage("Docker check") {
         container("docker") {
             sh 'docker --version'
@@ -54,5 +67,10 @@ podTemplate(name: k8slabel, label: k8slabel, yaml: slavePodTemplate, showRawYaml
             sh 'terraform version'
         }
     }
+    stage("Packer Check") {
+        container("packer") {
+            sh 'packer version'
+        }
     }
+  }
 }
