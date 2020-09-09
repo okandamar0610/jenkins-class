@@ -45,15 +45,23 @@ def slavePodTemplate = """
           }
           dir('deployments/docker') {
               container('docker'){
+                withCredentials([usernamePassword(credentialsId: 'docker-creds', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+                  
+                    stage("Docker build"){  
+                        sh 'docker build -t artemis .'
+                    }
 
-                  stage("Docker build"){  
-                  sh 'docker build -t artemis .'
-                  }
-              }
-              
-              stage("checking"){
-                  sh 'ls -l'
-              }
+                    stage("Docker Login"){
+                        sh "docker login --username $USERNAME --password $PASSWORD "
+                    }
+
+                    stage("Docker Push"){  
+                        sh 'docker tag -t artemis okandamar0610/artemis'
+                        sh 'docker push okandamar0610/artemis'
+                    }
+                }
+             }
+
         }
 
       }
