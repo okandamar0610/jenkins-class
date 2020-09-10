@@ -8,6 +8,8 @@ properties([
         booleanParam(defaultValue: false, description: 'Select the be able to push the latest', name: 'pushLatest')
         ])
     ])
+
+
 // yaml def for slaves 
 def slavePodTemplate = """
       metadata:
