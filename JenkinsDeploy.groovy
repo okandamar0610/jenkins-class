@@ -46,30 +46,41 @@ def slavePodTemplate = """
               path: /var/run/docker.sock
     """
     podTemplate(name: k8slabel, label: k8slabel, yaml: slavePodTemplate, showRawYaml: false) {
-      node(k8slabel) {
-
-        stage("Checkout SCM") {
-            git 'https://github.com/okandamar0610/jenkins-class.git'
-
-        }  
-
-
-        stage("Apply/Plan") {
+        node(k8slabel) {
             container("fuchicorptools") {
-
-                if (!params.destroyChanges) {
-                    if (params.applyChanges) {
-                        println("Applying the changes!")
-                    } else {
-                        println("Planing the changes")
+                stage("Pull the SCM") {
+                    git 'https://github.com/fsadykov/jenkins-class'
+                }
+                dir('deployments/k8s') {
+                    stage("Apply/Plan") {
+                        if (!params.destroyChanges) {
+                            if (params.applyChanges) {
+                                println("Applying the changes!")
+                            } else {
+                                println("Planing the changes")
+                            }
+                        }
+                    }
+                    stage("Destroy") {
+                        if (!params.applyChanges) {
+                            if (params.destroyChanges) {
+                                println("Destroying everything")
+                            } 
+                        }
+                        if (params.applyChanges) {
+                            if (params.destroyChanges) {
+                                println("""
+                                Sorry I can not destroy Tools!!!
+                                I can Destroy only following environments dev, qa, test, stage
+                                """)
+                            }
+                        }
+                    }
                     }
                 }
             }
-        }
-        
       }
     }
-
 
 
 
