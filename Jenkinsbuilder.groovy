@@ -2,7 +2,7 @@
 def k8slabel = "jenkins-pipeline-${UUID.randomUUID().toString()}"
 def branch = "${scm.branches[0].name}".replaceAll(/^\*\//, '')
 def gitCommitHash = " "
-def  environment = ""
+def  environment = " "
 
 if (branch == "master") {
   println("The application will be deployed to stage environment!")
