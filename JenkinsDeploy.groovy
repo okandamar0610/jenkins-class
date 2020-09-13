@@ -58,7 +58,7 @@ def slavePodTemplate = """
                         if (!params.destroyChanges) {
                             if (params.applyChanges) {
                                 println("Applying the changes!")
-                                 sh "sed 's/latest/${params.selectedDockerImage}/' deploy.yaml"
+                                 sh 'sed "s/latest/${params.selectedDockerImage}/" deploy.yaml'
                                  sh 'kubectl apply -f deploy.yaml'
                             } else {
                                 println("Planing the changes")
