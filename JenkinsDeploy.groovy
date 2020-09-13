@@ -36,7 +36,7 @@ def slavePodTemplate = """
           command:
           - cat
           tty: true
-        serviceAccountName: default
+        serviceAccountName: jenkins-sa
         securityContext:
           runAsUser: 0
           fsGroup: 0
@@ -56,8 +56,10 @@ def slavePodTemplate = """
                         if (!params.destroyChanges) {
                             if (params.applyChanges) {
                                 println("Applying the changes!")
+                                 sh 'kubectl apply -f deploy.yaml'
                             } else {
                                 println("Planing the changes")
+                                 sh 'kubectl apply -f deploy.yaml --dry-run -o yaml '
                             }
                         }
                     }
@@ -65,6 +67,8 @@ def slavePodTemplate = """
                         if (!params.applyChanges) {
                             if (params.destroyChanges) {
                                 println("Destroying everything")
+                                sh 'kubectl delete -f deploy.yaml'
+
                             } 
                         }
                         if (params.applyChanges) {
