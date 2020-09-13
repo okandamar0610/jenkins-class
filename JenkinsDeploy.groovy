@@ -50,7 +50,7 @@ def slavePodTemplate = """
         node(k8slabel) {
             container("fuchicorptools") {
                 stage("Pull the SCM") {
-                    git 'https://github.com/fsadykov/jenkins-class'
+                    git 'https://github.com/okandamar0610/jenkins-class.git'
                     gitCommitHash = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
                 }
                 dir('deployments/k8s') {
@@ -58,7 +58,7 @@ def slavePodTemplate = """
                         if (!params.destroyChanges) {
                             if (params.applyChanges) {
                                 println("Applying the changes!")
-                                 sh "sed 's/latest/${gitCommitHash}/' deploy.yaml"
+                                 sh "sed 's/latest/${params.selectedDockerImage}/' deploy.yaml"
                                  sh 'kubectl apply -f deploy.yaml'
                             } else {
                                 println("Planing the changes")
