@@ -1,5 +1,6 @@
 // Uniq name for the pod or slave 
 def k8slabel = "jenkins-pipeline-${UUID.randomUUID().toString()}"
+def gitCommitHash = " "
 
 
 properties([
@@ -50,12 +51,14 @@ def slavePodTemplate = """
             container("fuchicorptools") {
                 stage("Pull the SCM") {
                     git 'https://github.com/fsadykov/jenkins-class'
+                    gitCommitHash = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
                 }
                 dir('deployments/k8s') {
                     stage("Apply/Plan") {
                         if (!params.destroyChanges) {
                             if (params.applyChanges) {
                                 println("Applying the changes!")
+                                 sh "sed 's/latest/${gitCommitHash}/' deploy.yaml"
                                  sh 'kubectl apply -f deploy.yaml'
                             } else {
                                 println("Planing the changes")
